@@ -1,6 +1,7 @@
 package nl.kadaster.labs.multiproxy;
 
 import jakarta.servlet.http.HttpServletRequest;
+import nl.kadaster.labs.multiproxy.strategies.*;
 import nl.kadaster.labs.multiproxy.strategies.Strategy;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -14,8 +15,11 @@ import java.util.Map;
 public class Endpoint {
     private final Map<String, Strategy> strategies = new HashMap<>();
 
-    @GetMapping("*")
-    public String queryGet(HttpServletRequest request, @RequestParam("mode") String mode, @RequestParam("user") String user, @RequestParam("query") String query) {
+    public Endpoint() {
+        this.strategies.put("plain", new Plain());
+        this.strategies.put("rewriting", new Rewriting());
+    }
+
     @GetMapping("**")
     public String queryGet(HttpServletRequest request, @RequestParam("mode") String mode, @RequestParam("user") String user, @RequestParam("query") String query) throws IOException {
         return this.query(request, mode, user, query);
@@ -37,6 +41,9 @@ public class Endpoint {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Mode not found");
         }
 
-        return null;
+        Strategy strategy = this.strategies.get(mode);
+        String path = request.getRequestURI();
+
+        return strategy.execute(path, query, user);
     }
 }
