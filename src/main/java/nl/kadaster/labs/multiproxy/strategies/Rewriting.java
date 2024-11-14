@@ -42,135 +42,141 @@ public class Rewriting extends Strategy {
             return this.vars;
         }
 
-        public void visit(ElementTriplesBlock elementTriplesBlock) {
+        public void visit(ElementTriplesBlock elem) {
             throw new UnsupportedOperationException(); // TODO
         }
 
-        public void visit(ElementPathBlock elementPathBlock) {
-            for (var pathBlock : elementPathBlock.getPattern()) {
+        public void visit(ElementPathBlock elem) {
+            for (var pathBlock : elem.getPattern()) {
                 this.maybeRemember(pathBlock.getSubject());
                 this.maybeRemember(pathBlock.getPredicate());
                 this.maybeRemember(pathBlock.getObject());
             }
         }
 
-        public void visit(ElementFilter elementFilter) {
-            elementFilter.getExpr().visit(this);
+        public void visit(ElementFilter elem) {
+            elem.getExpr().visit(this);
         }
 
-        public void visit(ElementAssign elementAssign) {
+        public void visit(ElementAssign elem) {
             throw new UnsupportedOperationException(); // TODO
         }
 
-        public void visit(ElementBind elementBind) {
+        public void visit(ElementBind elem) {
             throw new UnsupportedOperationException(); // TODO
         }
 
-        public void visit(ElementUnfold elementUnfold) {
+        public void visit(ElementUnfold elem) {
             throw new UnsupportedOperationException(); // TODO
         }
 
-        public void visit(ElementData elementData) {
+        public void visit(ElementData elem) {
             throw new UnsupportedOperationException(); // TODO
         }
 
-        public void visit(ElementUnion elementUnion) {
-            throw new UnsupportedOperationException(); // TODO
+        public void visit(ElementUnion elem) {
+            var els = elem.getElements();
+            for (Element el : els) {
+                el.visit(this);
+            }
         }
 
-        public void visit(ElementOptional elementOptional) {
-            throw new UnsupportedOperationException(); // TODO
+        public void visit(ElementOptional elem) {
+            elem.getOptionalElement().visit(this);
         }
 
-        public void visit(ElementLateral elementLateral) {
-            throw new UnsupportedOperationException(); // TODO
+        public void visit(ElementLateral elem) {
+            elem.getLateralElement().visit(this);
         }
 
-        public void visit(ElementGroup elementGroup) {
-            for (Element element : elementGroup.getElements()) {
+        public void visit(ElementGroup elem) {
+            for (Element element : elem.getElements()) {
                 element.visit(this);
             }
         }
 
-        public void visit(ElementDataset elementDataset) {
+        public void visit(ElementDataset elem) {
             throw new UnsupportedOperationException(); // TODO
         }
 
-        public void visit(ElementNamedGraph elementNamedGraph) {
+        public void visit(ElementNamedGraph elem) {
             throw new UnsupportedOperationException(); // TODO
         }
 
-        public void visit(ElementExists elementExists) {
+        public void visit(ElementExists elem) {
             throw new UnsupportedOperationException(); // TODO
         }
 
-        public void visit(ElementNotExists elementNotExists) {
+        public void visit(ElementNotExists elem) {
             throw new UnsupportedOperationException(); // TODO
         }
 
-        public void visit(ElementMinus elementMinus) {
+        public void visit(ElementMinus elem) {
             throw new UnsupportedOperationException(); // TODO
         }
 
-        public void visit(ElementService elementService) {
+        public void visit(ElementService elem) {
             throw new UnsupportedOperationException(); // TODO
         }
 
-        public void visit(ElementSubQuery elementSubQuery) {
+        public void visit(ElementSubQuery elem) {
             throw new UnsupportedOperationException(); // TODO
+        }
+
+        public void visit(ExprFunction0 expr) {
+            throw new UnsupportedOperationException(); // TODO
+        }
+
+        public void visit(ExprFunction1 expr) {
+            expr.getArg().visit(this);
+        }
+
+        public void visit(ExprFunction2 expr) {
+            expr.getArg1().visit(this);
+            expr.getArg2().visit(this);
+        }
+
+        public void visit(ExprFunction3 expr) {
+            expr.getArg1().visit(this);
+            expr.getArg2().visit(this);
+            expr.getArg3().visit(this);
+        }
+
+        public void visit(ExprFunctionN expr) {
+            var args = expr.getArgs();
+            for (Expr arg : args) {
+                arg.visit(this);
+            }
+        }
+
+        public void visit(ExprFunctionOp expr) {
+            throw new UnsupportedOperationException(); // TODO
+        }
+
+        public void visit(ExprTripleTerm expr) {
+            throw new UnsupportedOperationException(); // TODO
+        }
+
+        public void visit(NodeValue node) {
+            return;
+        }
+
+        public void visit(ExprVar expr) {
+            this.vars.add(expr.asVar());
+        }
+
+        public void visit(ExprAggregator expr) {
+            throw new UnsupportedOperationException(); // TODO
+        }
+
+        public void visit(ExprNone expr) {
+            return;
         }
 
         private void maybeRemember(Node node) {
             if (node instanceof Var) {
                 this.vars.add((Var) node);
             }
-        }
-
-        public void visit(ExprFunction0 exprFunction0) {
-            throw new UnsupportedOperationException(); // TODO
-        }
-
-        public void visit(ExprFunction1 exprFunction1) {
-            exprFunction1.getArg().visit(this);
-        }
-
-        public void visit(ExprFunction2 exprFunction2) {
-            exprFunction2.getArg1().visit(this);
-            exprFunction2.getArg2().visit(this);
-        }
-
-        public void visit(ExprFunction3 exprFunction3) {
-            exprFunction3.getArg1().visit(this);
-            exprFunction3.getArg2().visit(this);
-            exprFunction3.getArg3().visit(this);
-        }
-
-        public void visit(ExprFunctionN exprFunctionN) {
-            throw new UnsupportedOperationException(); // TODO
-        }
-
-        public void visit(ExprFunctionOp exprFunctionOp) {
-            throw new UnsupportedOperationException(); // TODO
-        }
-
-        public void visit(ExprTripleTerm exprTripleTerm) {
-            throw new UnsupportedOperationException(); // TODO
-        }
-
-        public void visit(NodeValue nodeValue) {
-            throw new UnsupportedOperationException(); // TODO
-        }
-
-        public void visit(ExprVar exprVar) {
-            this.vars.add(exprVar.asVar());
-        }
-
-        public void visit(ExprAggregator exprAggregator) {
-            throw new UnsupportedOperationException(); // TODO
-        }
-
-        public void visit(ExprNone exprNone) {
-            throw new UnsupportedOperationException(); // TODO
         }
     }
 }
