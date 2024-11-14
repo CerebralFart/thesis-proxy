@@ -5,6 +5,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 public abstract class Strategy {
     protected static final String TEMPLATE_FILTER = """
@@ -17,6 +18,9 @@ public abstract class Strategy {
 
 
     private static final OkHttpClient CLIENT = new OkHttpClient.Builder()
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(15, TimeUnit.MINUTES)
             .build();
 
     public abstract String execute(String path, String query, String user) throws IOException;

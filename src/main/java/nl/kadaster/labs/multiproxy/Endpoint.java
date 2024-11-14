@@ -17,6 +17,7 @@ public class Endpoint {
 
     public Endpoint() {
         this.strategies.put("plain", new Plain());
+        this.strategies.put("preselection", new Preselection());
         this.strategies.put("rewriting", new Rewriting());
     }
 
