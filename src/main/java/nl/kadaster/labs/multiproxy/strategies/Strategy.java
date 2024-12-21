@@ -37,7 +37,9 @@ public abstract class Strategy {
                 .header("Content-Type", "application/x-www-form-urlencoded")
                 .post(body)
                 .build();
-        var response = CLIENT.newCall(request).execute();
-        return response.body().string();
+        try (var response = CLIENT.newCall(request).execute()) {
+            var text = response.body();
+            return text == null ? null : text.string();
+        }
     }
 }
