@@ -6,6 +6,7 @@ import org.apache.jena.query.QueryFactory;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.expr.*;
 import org.apache.jena.sparql.syntax.*;
+import org.springframework.http.ResponseEntity;
 
 
 import java.io.IOException;
@@ -14,7 +15,8 @@ import java.util.Set;
 
 public class Rewriting extends Strategy {
     @Override
-    public String execute(String path, String query, String user) throws IOException {
+    public ResponseEntity<String> execute(String path, String query, String user) throws IOException {
+        var rewriteStart = System.currentTimeMillis();
         var queryObj = QueryFactory.create(query);
         var visitor = new Visitor();
         var pattern = (ElementGroup) queryObj.getQueryPattern(); // TODO unchecked
@@ -31,8 +33,17 @@ public class Rewriting extends Strategy {
         for (var filter : builder.getHandlerBlock().getWhereHandler().getClause().getElements()) {
             pattern.addElement(filter);
         }
+        var executionStart = System.currentTimeMillis();
 
-        return this.execute(path, queryObj.toString());
+        var response = this.execute(path, queryObj.toString());
+        var completion = System.currentTimeMillis();
+
+        return ResponseEntity.ok()
+                .header(HEADER_SERVER_TIMING, "rewriting;dur=%d, execution;dur=%d".formatted(
+                        executionStart - rewriteStart,
+                        completion - executionStart
+                ))
+                .body(response);
     }
 
     private static class Visitor implements ElementVisitor, ExprVisitor {

@@ -5,6 +5,7 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFWriter;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.ByteArrayOutputStream;
@@ -20,7 +21,8 @@ public class Preselection extends Strategy {
     }
 
     @Override
-    public String execute(String path, String query, String user) throws IOException {
+    public ResponseEntity<String> execute(String path, String query, String user) {
+        var preselectionStart = System.currentTimeMillis();
         var queryObj = QueryFactory.create(query);
         if (queryObj.isUnknownType()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown query type");
 
@@ -43,8 +45,16 @@ public class Preselection extends Strategy {
                 .replace(":user", user);
         try (QueryExecution constructQuery = QueryExecutionFactory.create(constructString, ModelFactory.createDefaultModel())) {
             var subgraph = constructQuery.execConstruct();
+            var executionStart = System.currentTimeMillis();
             try (QueryExecution execution = QueryExecutionFactory.create(query, subgraph)) {
-                return this.buildResponse(execution);
+                var response = this.buildResponse(execution);
+                var completion = System.currentTimeMillis();
+                return ResponseEntity.ok()
+                        .header(HEADER_SERVER_TIMING, "preselection;dur=%d, execution;dur=%d".formatted(
+                                executionStart - preselectionStart,
+                                completion - executionStart
+                        ))
+                        .body(response);
             }
         }
     }

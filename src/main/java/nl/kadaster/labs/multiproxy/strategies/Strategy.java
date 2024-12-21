@@ -3,11 +3,13 @@ package nl.kadaster.labs.multiproxy.strategies;
 import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import org.springframework.http.ResponseEntity;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 public abstract class Strategy {
+    protected static final String HEADER_SERVER_TIMING = "Server-Timing";
     protected static final String TEMPLATE_FILTER = """
            (NOT EXISTS{?:node <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/Product>} || EXISTS {?:node ^<http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/product>/<http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/vendor> <:user>})
         && (NOT EXISTS{?:node <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/Offer>} || EXISTS {?:node <http://www4.wiwiss.fu-berlin.de/bizer/bsbm/v01/vocabulary/vendor> <:user>})
@@ -23,7 +25,7 @@ public abstract class Strategy {
             .readTimeout(15, TimeUnit.MINUTES)
             .build();
 
-    public abstract String execute(String path, String query, String user) throws IOException;
+    public abstract ResponseEntity<String> execute(String path, String query, String user) throws IOException;
 
     public String execute(String path, String query) throws IOException {
         var body = new FormBody.Builder()
